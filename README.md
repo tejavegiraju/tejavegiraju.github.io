@@ -1,1 +1,0 @@
-# tejavegiraju.github.io

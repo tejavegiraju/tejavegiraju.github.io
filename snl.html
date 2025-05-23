@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snakes and Ladders</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/nav.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        function initializeGame() {
+            createBoard();
+            setupGame();
+        }
+    </script>
 </head>
-<body onload="loadNav()">
+<body onload="loadNav();initializeGame()">
     <div id="nav-placeholder"></div>
     <h1>Snakes and Ladders</h1>
+    <div id="controls" style="text-align: center; margin-top: 20px;">
+        <button onclick="rollDice()">Roll Dice</button>
+        <p id="dice-result">Dice: </p>
+    </div>
+    <div id="game-board" style="display: grid; /*grid-template-columns: repeat(10, 50px);*/ gap: 2px; margin: 20px auto; width: 520px; position: relative;"></div>
 </body>
 </html>

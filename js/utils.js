@@ -75,8 +75,8 @@ function createBoard() {
             const cell = document.createElement('div');
             cell.textContent = cellNumber;
             cell.style.border = '1px solid black';
-            cell.style.height = '50px';
-            cell.style.width = '50px';
+            cell.style.height = '25px';
+            cell.style.width = '25px';
             cell.style.display = 'flex';
             cell.style.alignItems = 'center';
             cell.style.justifyContent = 'center';

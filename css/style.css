@@ -38,3 +38,14 @@ h1 {
     text-align: center;
     margin-top: 20px;
 }
+
+#game-board {
+    display : grid;
+    gap : 2px;
+    width : 100%;
+    margin : 0 auto;
+}
+
+.highlight {
+    border : 3px solid yellow !important
+}

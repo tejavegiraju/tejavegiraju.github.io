@@ -53,27 +53,28 @@ const { snakes, ladders } = generateRandomSnakesAndLadders();
 function createBoard() {
     const board = document.getElementById('game-board');
     board.innerHTML = ''; // Clear the board
+    board.style.gridTemplateColumns = 'repeat(10, 1fr)';
+    board.style.maxWidth = '500px';
+
     let isReverse = false;
     for (let row = 10; row > 0; row--) {
-        const rowDiv = document.createElement('div');
-        rowDiv.style.display = 'flex';
-        rowDiv.style.flexDirection = isReverse ? 'row-reverse' : 'row';
-        for (let col = 10; col >= 1; col--) {
-            const cellNumber = (row - 1) * 10 + col;
+        for (let col = 10; col > 0; col--) {
+            const cellNumber = (row - 1) * 10 + (!isReverse 
+                ?  col
+                : 11 - col);
             const cell = document.createElement('div');
             cell.textContent = cellNumber;
             cell.style.border = '1px solid black';
-            cell.style.height = '25px';
-            cell.style.width = '25px';
+            cell.style.height = '50px';
+            cell.style.width = '50px';
             cell.style.display = 'flex';
             cell.style.alignItems = 'center';
             cell.style.justifyContent = 'center';
             cell.style.position = 'relative';
             cell.id = `cell-${cellNumber}`;
-            rowDiv.appendChild(cell);
+            board.appendChild(cell);
         }
         isReverse = !isReverse;
-        board.appendChild(rowDiv);
     }
 
     addSnakesAndLadders();
@@ -110,7 +111,6 @@ function highlightCurrentPlayer(playerPosition) {
     const currentCell = document.getElementById(`cell-${playerPosition}`);
     if (currentCell) {
         currentCell.classList.add('highlight');
-        currentCell.style.border = '3px solid yellow';
     }
 }
 
@@ -134,6 +134,8 @@ function setupGame() {
         player.marker = playerMarker;
         document.getElementById(`cell-${player.position}`).appendChild(playerMarker);
     });
+
+    highlightCurrentPlayer(players[currentPlayerIndex].position);
     document.getElementById('current-player').textContent = `Current Player: P${players[currentPlayerIndex].id}`;
 
     document.querySelector('button').addEventListener('click', () => {
@@ -148,18 +150,19 @@ function setupGame() {
             } else if (ladders[newPosition] && ladders[newPosition] != -1) {
                 newPosition = ladders[newPosition];
             }
-            // document.querySelectorAll('.highlight').forEach(cell => cell.classList.remove('highlight'));
             document.getElementById(`cell-${currentPlayer.position}`).removeChild(currentPlayer.marker);
             currentPlayer.position = newPosition;
             document.getElementById(`cell-${currentPlayer.position}`).appendChild(currentPlayer.marker);
             if (newPosition == 100) {
-                document.getElementById('dice-result').textContent = 'You win!';
+                document.getElementById('dice-result').textContent = `P${players[currentPlayerIndex].id} win!`;
                 document.querySelector('button').disabled = true;
-            } 
+            }
         } else if (newPosition > 100) {
             document.getElementById('dice-result').textContent = 'You rolled too high!';
         }
+
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        highlightCurrentPlayer(players[currentPlayerIndex].position);
         document.getElementById('current-player').textContent = `Current Player: P${players[currentPlayerIndex].id}`;
     });
 }

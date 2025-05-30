@@ -49,3 +49,35 @@ h1 {
 .highlight {
     border : 3px solid yellow !important
 }
+
+div#players {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+div.player, div#draw-cards, div#discarded-cards {
+    border : 1px solid black;
+    padding : 10px;
+    border-radius : 8px;
+    box-shadow : 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align : center;
+    min-width: 200px;
+}
+
+button {
+    background-color : #4CAF50;
+    color : white;
+    border : none;
+    border-radius : 5px;
+    padding : 10px 20px;
+    cursor : pointer;
+    box-shadow : 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size : 16px;
+    transition : background-color 0.3s;
+}
+
+button:disabled {
+    background-color : #ccc;
+    cursor : not-allowed;
+}

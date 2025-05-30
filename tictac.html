@@ -6,9 +6,19 @@
     <title>Tic-Tac-Toe</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/utils.js"></script>
+    <script src="js/ticktac.js"></script>
 </head>
-<body onload="loadNav()">
+<body onload="loadNav();createBoard()">
     <div id="nav-placeholder"></div>
-    <h1>Tic-Tac-Toe</h1>
+    <h2>Tic-Tac-Toe</h2>
+    <div id="tic-tac-game-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 5px;">
+        <div id="controls" style="text-align: center; margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 20px;">
+            <p id="game-status" style="margin-top: 20px; font-size: 18px;">Player X's turn</p>
+            <button onclick="resetGame()" style="margin-top: 10px;">Reset Game</button>
+        </div>
+        <div id="game-board" style="display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; justify-content: center;">
+            <!-- Cells will be dynamically generated -->
+        </div>
+    </div>
 </body>
 </html>

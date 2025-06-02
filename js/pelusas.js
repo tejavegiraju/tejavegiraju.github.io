@@ -6,8 +6,8 @@ let discardedCards = [];
 function initializeGame() {
     const playerNames = prompt('Enter player names (comma-separated):').split(',').map(name => name.trim());
     const uniquePlayerNames = [...new Set(playerNames.filter(name => name))]; // Ensure unique names
-    if (uniquePlayerNames.length < 3 || uniquePlayerNames.length > 6) {
-        alert('Please enter between 3 and 6 player names.');
+    if (uniquePlayerNames.length < 2 || uniquePlayerNames.length > 6) {
+        alert('Please enter between 2 and 6 player names.');
         initializeGame();
         return;
     }

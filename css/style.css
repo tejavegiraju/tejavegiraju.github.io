@@ -1,83 +1,12 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: #1a202c;
 }
 
-nav {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
-}
-
-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-}
-
-nav ul li {
-    margin: 0 15px;
-}
-
-nav ul li a {
-    color: white;
-    text-decoration: none;
+/* Highlight current lyric line */
+.lyric-active {
+    color: #8b5cf6;
     font-weight: bold;
-}
-
-nav ul li a:hover {
-    text-decoration: underline;
-}
-
-h1 {
-    text-align: center;
-    margin-top: 20px;
-}
-
-#game-board {
-    display : grid;
-    gap : 2px;
-    width : 100%;
-    margin : 0 auto;
-}
-
-.highlight {
-    border : 3px solid yellow !important
-}
-
-div#players {
-    display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(3, 1fr);
-}
-
-div.player, div#draw-cards, div#discarded-cards {
-    border : 1px solid black;
-    padding : 10px;
-    border-radius : 8px;
-    box-shadow : 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align : center;
-    min-width: 200px;
-}
-
-button {
-    background-color : #4CAF50;
-    color : white;
-    border : none;
-    border-radius : 5px;
-    padding : 10px 20px;
-    cursor : pointer;
-    box-shadow : 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size : 16px;
-    transition : background-color 0.3s;
-}
-
-button:disabled {
-    background-color : #ccc;
-    cursor : not-allowed;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
 }

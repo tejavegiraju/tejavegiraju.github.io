@@ -1,0 +1,60 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #1a202c; /* Dark background */
+}
+
+/* Style the progress bar track */
+input[type="range"]::-webkit-slider-runnable-track {
+    background: #4a5568;
+    height: 4px;
+    border-radius: 9999px;
+}
+
+input[type="range"]::-moz-range-track {
+    background: #4a5568;
+    height: 4px;
+    border-radius: 9999px;
+}
+
+/* Style the progress bar thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #8b5cf6;
+    border-radius: 50%;
+    margin-top: -4px;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #8b5cf6;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Style for the volume slider */
+#volume-bar::-webkit-slider-thumb {
+    width: 8px;
+    height: 8px;
+    margin-top: -2px;
+}
+
+#volume-bar::-moz-range-thumb {
+    width: 8px;
+    height: 8px;
+}
+
+/* Highlight current lyric line */
+.lyric-active {
+    color: #8b5cf6;
+    font-weight: bold;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}

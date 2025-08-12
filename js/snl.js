@@ -50,7 +50,7 @@ function generateRandomSnakesAndLadders() {
 
 const { snakes, ladders } = generateRandomSnakesAndLadders();
 
-function createBoard() {
+export function initializeSNL() {
     const board = document.getElementById('game-board');
     board.innerHTML = ''; // Clear the board
     board.style.gridTemplateColumns = 'repeat(10, 1fr)';
@@ -114,7 +114,7 @@ function highlightCurrentPlayer(playerPosition) {
     }
 }
 
-function setupGame() {
+export function setupSNLGame() {
     const players = [
         { id: 1, position: 1, color: 'blue' },
         { id: 2, position: 1, color: 'red' }
@@ -165,4 +165,8 @@ function setupGame() {
         highlightCurrentPlayer(players[currentPlayerIndex].position);
         document.getElementById('current-player').textContent = `Current Player: P${players[currentPlayerIndex].id}`;
     });
+}
+
+export function attachSNLGameEvents() {
+    document.getElementById('roll-dice-btn').addEventListener('click', rollDice);
 }

@@ -3,12 +3,21 @@ let currentPlayerIndex = 0;
 let drawCards = [];
 let discardedCards = [];
 
-function initializeGame() {
-    const playerNames = prompt('Enter player names (comma-separated):').split(',').map(name => name.trim());
+export function attachPelusasEvents() {
+    document.getElementById('draw-risk').addEventListener('click', drawRisk);
+    document.getElementById('skip').addEventListener('click', skipTurn);
+}
+
+export function initializePelusas() {
+    const playerNamesInput = prompt('Enter player names (comma-separated):');
+    if (!playerNamesInput) {
+        return;
+    }
+    const playerNames = playerNamesInput.split(',').map(name => name.trim());
     const uniquePlayerNames = [...new Set(playerNames.filter(name => name))]; // Ensure unique names
     if (uniquePlayerNames.length < 2 || uniquePlayerNames.length > 6) {
         alert('Please enter between 2 and 6 player names.');
-        initializeGame();
+        initializePelusas();
         return;
     }
     players = uniquePlayerNames.map(name => ({ name, cards: [], score: 0 }));
@@ -62,8 +71,15 @@ function skipTurn() {
 
 function checkSkipEligibility() {
     const currentPlayer = players[currentPlayerIndex];
+    const skipButton = document.getElementById('skip');
     if (currentPlayer.cards.length >= 3) {
-        document.getElementById('skip').disabled = false;
+        skipButton.disabled = false;
+        skipButton.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+        skipButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+    } else {
+        skipButton.disabled = true;
+        skipButton.classList.add('bg-gray-600', 'hover:bg-gray-700');
+        skipButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
     }
 }
 
@@ -89,20 +105,28 @@ function updateUI() {
 
     players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
-        playerDiv.className = 'player';
+        playerDiv.className = 'player bg-gray-700 rounded-xl p-4 text-center shadow-md';
         playerDiv.id = `player-${player.name}`;
-        playerDiv.innerHTML = `<p><strong>${player.name}</strong></p>
-            <p>Score: ${player.score}</p>
-            <p>Cards: ${player.cards.join(', ')}</p>`;
+
         if (index === currentPlayerIndex) {
-            playerDiv.style.backgroundColor = 'lightyellow';
+            playerDiv.classList.add('bg-yellow-800', 'text-yellow-100');
         }
+
+        const headerDiv = document.createElement('div');
+        headerDiv.classList.add('mb-2');
+        headerDiv.innerHTML = `<p class="font-bold text-lg">${player.name}</p>
+            <p class="text-sm">Score: ${player.score}</p>
+            <p>Cards: ${player.cards.join(', ')}</p>`;
+        playerDiv.appendChild(headerDiv);
+
         const cardsDiv = document.createElement('div');
+        cardsDiv.classList.add('flex', 'justify-center', 'flex-wrap', 'gap-2');
+        
         const uniqueCards = [...new Set(player.cards)];
         uniqueCards.forEach(card => {
             const cardButton = document.createElement('button');
             cardButton.textContent = card;
-            cardButton.style.margin = '5px';
+            cardButton.classList.add('bg-purple-600', 'hover:bg-purple-700', 'text-white', 'font-bold', 'py-1', 'px-3', 'rounded-full', 'transition-colors', 'disabled:opacity-50', 'disabled:cursor-not-allowed');
             cardButton.disabled = player.cards.length < 3 || currPlayerCards.indexOf(card) == -1 
                 || index === currentPlayerIndex;
             cardButton.onclick = () => transferCards(player, card);
@@ -123,8 +147,7 @@ function updateUI() {
         const winner = players.reduce((prev, curr) => (prev.score > curr.score ? prev : curr));
         document.getElementById('game-status').textContent = `Game Over!
             Winner is ${winner.name} with score ${winner.score}`;
-        document.getElementById(`player-${winner.name}`).style.backgroundColor = 'lightgreen';
-        // updateUI();
+        document.getElementById(`player-${winner.name}`).classList.add('bg-green-600', 'text-white');
     }
 }
 

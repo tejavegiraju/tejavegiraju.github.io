@@ -1,7 +1,11 @@
 let currentPlayer = 'X';
 let board = Array(9).fill(null);
 
-function createBoard() {
+export function attachTicTacEvents() {
+    document.getElementById('reset-tic-tac').addEventListener('click', resetTicTac);
+}
+
+export function initializeTicTac() {
     const gameBoard = document.getElementById('game-board');
     gameBoard.innerHTML = '';
     board.forEach((_, index) => {
@@ -51,13 +55,9 @@ function disableBoard() {
     });
 }
 
-function resetGame() {
+function resetTicTac() {
     currentPlayer = 'X';
     board = Array(9).fill(null);
     document.getElementById('game-status').textContent = `Player ${currentPlayer}'s turn`;
-    createBoard();
+    initializeTicTac();
 }
-
-window.onload = () => {
-    createBoard();
-};

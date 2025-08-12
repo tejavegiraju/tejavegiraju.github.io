@@ -1,27 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snakes and Ladders</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/utils.js"></script>
-    <script src="js/snl.js"></script>
-    <script>
-        function initializeGame() {
-            createBoard();
-            setupGame();
-        }
-    </script>
-</head>
-<body onload="loadNav();initializeGame()">
-    <div id="nav-placeholder"></div>
-    <h2>Snakes and Ladders</h2>
-    <div id="controls" style="text-align: center; margin-top: 5px; display: flex; justify-content: center; align-items: center; gap: 20px;">
-        <button onclick="rollDice()">Roll Dice</button>
-        <p id="dice-result">Dice: </p>
-        <p id="current-player"></p>
+<main class="flex flex-col items-center p-4 bg-gray-800 rounded-xl shadow-lg">
+    <h2 class="text-3xl font-extrabold text-purple-400 mb-4">Snakes and Ladders</h2>
+    <div id="controls" class="flex justify-center items-center gap-4 mb-6">
+        <button id="roll-dice-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full text-lg shadow-md transition-colors">
+            Roll Dice
+        </button>
+        <p id="dice-result" class="text-xl font-semibold">Dice: </p>
+        <p id="current-player" class="text-xl font-semibold"></p>
     </div>
-    <div id="game-board" style="display: grid; /*grid-template-columns: repeat(10, 50px);*/ gap: 2px; margin: 20px auto; width: 520px; position: relative;"></div>
-</body>
-</html>
+    <div id="game-board" class="grid w-[520px] h-[520px] gap-0.5 relative mx-auto bg-gray-900 border-2 border-gray-900 rounded-lg shadow-xl overflow-hidden"></div>
+</main>

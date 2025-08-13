@@ -1,10 +1,12 @@
 
 // Global variables
 let audioPlayer, playPauseBtn, playIcon, pauseIcon, nextBtn, prevBtn, shuffleBtn, repeatBtn;
+let miniPlayPause, miniNext, miniPrev, miniPlayIcon, miniPauseIcon;
 let songTitleDisplay, artistNameDisplay, fileSelector, songsList, songsHeader, songsArrow, sortBtn;
 let progressBar, currentTimeDisplay, durationTimeDisplay, volumeBar, albumArt;
 let lyricsHeader, lyricsArrow, lyricsContainer, lyricsContent;
 let playlistsHeader, playlistsList, playlistsArrow;
+let musicPlayerContainer, playerHeader, togglePlayerBtn, toggleIcon, playerContent;
 
 let playableSongs = [];
 let allFilesMap = new Map();
@@ -296,6 +298,8 @@ function playPause() {
         audioPlayer.pause();
         playIcon.classList.remove('hidden');
         pauseIcon.classList.add('hidden');
+        miniPlayIcon.classList.remove('hidden');
+        miniPauseIcon.classList.add('hidden');
         if ('mediaSession' in navigator) {
             navigator.mediaSession.playbackState = 'paused';
         }
@@ -303,6 +307,8 @@ function playPause() {
         audioPlayer.play();
         playIcon.classList.add('hidden');
         pauseIcon.classList.remove('hidden');
+        miniPlayIcon.classList.add('hidden');
+        miniPauseIcon.classList.remove('hidden');
         if ('mediaSession' in navigator) {
             navigator.mediaSession.playbackState = 'playing';
         }
@@ -504,6 +510,9 @@ function setupUIEventListeners() {
         audioPlayer.volume = event.target.value;
     });
 
+    // Attach event listener to the toggle button
+    playerHeader.addEventListener('click', toggleMiniPlayer);
+
     // Add event listeners to the buttons
     playPauseBtn.addEventListener('click', playPause);
     nextBtn.addEventListener('click', nextSong);
@@ -511,6 +520,11 @@ function setupUIEventListeners() {
     shuffleBtn.addEventListener('click', toggleShuffle);
     repeatBtn.addEventListener('click', toggleRepeat);
     sortBtn.addEventListener('click', sortPlaylist);
+
+    // Event listeners for mini player controls
+    miniPlayPause.addEventListener('click', playPause);
+    miniNext.addEventListener('click', nextSong);
+    miniPrev.addEventListener('click', prevSong);
 }
 
 // Function to set up the Media Session action handlers once
@@ -561,6 +575,16 @@ export function initializePlayer() {
     playlistsHeader = document.getElementById('playlists-header');
     playlistsList = document.getElementById('playlists-list');
     playlistsArrow = document.getElementById('playlists-arrow');
+    musicPlayerContainer = document.getElementById('player-container');
+    playerHeader = document.getElementById('player-header');
+    togglePlayerBtn = document.getElementById('toggle-player-btn');
+    toggleIcon = document.getElementById('toggle-icon');
+    playerContent = document.getElementById('player-content');
+    miniNext = document.getElementById('next-btn-mini');
+    miniPrev = document.getElementById('prev-btn-mini');
+    miniPlayPause = document.getElementById('play-pause-btn-mini');
+    miniPlayIcon = document.getElementById('play-icon-mini');
+    miniPauseIcon = document.getElementById('pause-icon-mini');
 
     // Initialize UI state
     songTitleDisplay.textContent = "No song selected";
@@ -595,4 +619,9 @@ function setupKeyboardShortcuts() {
             }
         }
     });
+}
+
+// Function to toggle the minimized/expanded state of the player
+function toggleMiniPlayer() {
+    musicPlayerContainer.classList.toggle('minimized');
 }

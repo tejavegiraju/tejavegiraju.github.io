@@ -58,3 +58,59 @@ input[type="range"]::-moz-range-thumb {
     transform: scale(1.1);
     transition: all 0.3s ease;
 }
+
+#player-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Styles for the minimized state */
+#player-container.minimized {
+    width: 200px; /* Adjust as needed */
+}
+
+/* Styles for the header when minimized */
+#player-container.minimized #player-header {
+    /* background-color: #3b3b3b; */
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+#player-container.minimized #player-header h3 {
+    font-size: 1rem;
+    font-weight: bold;
+}
+#player-container.minimized #player-content {
+    display: none;
+}
+
+/* Hide the main controls when minimized */
+#player-container .main-controls {
+    display: flex;
+}
+
+#player-container.minimized .main-controls {
+    display: none;
+}
+
+/* New styles for the mini controls */
+.mini-controls {
+    display: none; /* Initially hidden in expanded view */
+}
+
+#player-container.minimized .mini-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding-top: 0.5rem;
+}
+
+#player-container:not(.minimized) #toggle-icon {
+    transform: rotate(0deg);
+}
+
+#player-container.minimized #toggle-icon {
+    transform: rotate(180deg);
+}

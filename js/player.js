@@ -572,5 +572,27 @@ export function initializePlayer() {
     // Setup event listeners
     setupAudioEventListeners();
     setupUIEventListeners();
+    setupKeyboardShortcuts();
     setupMediaSession();
 };
+
+function setupKeyboardShortcuts() {
+    // Add global keyboard shortcuts
+    window.addEventListener('keydown', (event) => {
+        // Check for Ctrl + Alt keys
+        if (event.ctrlKey && event.altKey) {
+            switch (event.key) {
+                case ' ': // Spacebar
+                    event.preventDefault();
+                    playPause();
+                    break;
+                case 'ArrowRight':
+                    nextSong();
+                    break;
+                case 'ArrowLeft':
+                    prevSong();
+                    break;
+            }
+        }
+    });
+}

@@ -467,7 +467,8 @@ function setupUIEventListeners() {
             // Initially populate with all songs
             playableSongs = [...availableSongs];
             originalOrder = [...playableSongs];
-            currentSongIndex = 0;
+            // Randomly select a song to start with
+            currentSongIndex = Math.floor(Math.random() * (availableSongs.length + 1));;
             loadSong(currentSongIndex);
             renderSongsList(playableSongs);
             playPause(); // Start playing the first song if not already playing

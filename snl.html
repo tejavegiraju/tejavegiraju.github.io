@@ -1,4 +1,13 @@
-<main class="flex flex-col items-center p-4 bg-gray-800 rounded-xl shadow-lg">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Howdy - SnL</title>
+    <script src="js/redirect.js"></script>
+</head>
+<body style="display: none;" onload="redirectTo('snl.html');">
+    <main class="flex flex-col items-center p-4 bg-gray-800 rounded-xl shadow-lg">
     <h2 class="text-3xl font-extrabold text-purple-400 mb-4">Snakes and Ladders</h2>
     <div id="controls" class="flex justify-center items-center gap-4 mb-6">
         <button id="roll-dice-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full text-lg shadow-md transition-colors">
@@ -9,3 +18,5 @@
     </div>
     <div id="game-board" class="grid w-[520px] h-[520px] gap-0.5 relative mx-auto bg-gray-900 border-2 border-gray-900 rounded-lg shadow-xl overflow-hidden"></div>
 </main>
+</body>
+</html>

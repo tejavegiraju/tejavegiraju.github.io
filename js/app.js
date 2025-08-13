@@ -101,6 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentPath === 'index.html' || currentPath === '') {
         // No need to load content, it's already there. Just setup links.
         handleNavLinks();
+        const redirectedFrom = window.sessionStorage.getItem('redirectedFrom');
+        window.sessionStorage.removeItem('redirectedFrom'); // Clear the session storage
+        if (redirectedFrom && redirectedFrom !== currentPath && redirectedFrom !== 'index.html') {
+            loadPage(redirectedFrom); // Load the redirected page
+            window.history.replaceState({}, '', '/');
+        }
     } else {
         loadPage(currentPath);
     }

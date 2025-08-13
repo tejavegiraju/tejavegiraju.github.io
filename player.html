@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Howdy - Player</title>
-    <script src="js/redirect.js"></script>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsmediatags library for reading metadata (album art) -->
+    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/dist/jsmediatags.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/player.css">
+    <script type="module">
+        import { initializePlayer } from './js/player.js';            
+        // Alternative: Use DOMContentLoaded instead of onload
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.display = 'block';
+            initializePlayer();
+        });
+    </script>
 </head>
-<body style="display: none;" onload="redirectTo('');">
+<body style="display: none;">
+<div id="player-single" class="fixed z-50 transition-all duration-300 transform scale-100">
 <main class="text-white">
     <div class="bg-gray-800 rounded-2xl shadow-xl p-4 max-w-sm w-full">
         <div id="player-header" class="flex items-center justify-between cursor-pointer">
@@ -171,5 +185,6 @@
 </div>
 </div>
 </main>
+</div>
 </body>
 </html>

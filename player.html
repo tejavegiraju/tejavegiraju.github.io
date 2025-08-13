@@ -1,19 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Player</title>
-    <!-- Tailwind CSS CDN for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- jsmediatags library for reading metadata (album art) -->
-    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/dist/jsmediatags.min.js"></script>
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/music_player.css">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body onload="initializePlayer();" class="text-white">
-    <div id="nav-placeholder"></div>
+<main class="text-white">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-gray-800 rounded-2xl shadow-xl p-8 max-w-sm w-full">
         <!-- Album Art -->
@@ -143,7 +128,4 @@
             </div>
         </div>
     </div>
-
-    <script src="js/music_player.js"></script>
-</body>
-</html>
+</main>

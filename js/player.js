@@ -1,31 +1,10 @@
-// Get all necessary DOM elements
-const audioPlayer = document.getElementById('audio-player');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const playIcon = document.getElementById('play-icon');
-const pauseIcon = document.getElementById('pause-icon');
-const nextBtn = document.getElementById('next-btn');
-const prevBtn = document.getElementById('prev-btn');
-const shuffleBtn = document.getElementById('shuffle-btn');
-const repeatBtn = document.getElementById('repeat-btn');
-const songTitleDisplay = document.getElementById('song-title');
-const artistNameDisplay = document.getElementById('artist-name');
-const fileSelector = document.getElementById('file-selector');
-const songsList = document.getElementById('songs-list');
-const songsHeader = document.getElementById('songs-header');
-const songsArrow = document.getElementById('songs-arrow');
-const sortBtn = document.getElementById('sort-btn');
-const progressBar = document.getElementById('progress-bar');
-const currentTimeDisplay = document.getElementById('current-time');
-const durationTimeDisplay = document.getElementById('duration-time');
-const volumeBar = document.getElementById('volume-bar');
-const albumArt = document.getElementById('album-art');
-const lyricsHeader = document.getElementById('lyrics-header');
-const lyricsArrow = document.getElementById('lyrics-arrow');
-const lyricsContainer = document.getElementById('lyrics-container');
-const lyricsContent = document.getElementById('lyrics-content');
-const playlistsHeader = document.getElementById('playlists-header');
-const playlistsList = document.getElementById('playlists-list');
-const playlistsArrow = document.getElementById('playlists-arrow');
+
+// Global variables
+let audioPlayer, playPauseBtn, playIcon, pauseIcon, nextBtn, prevBtn, shuffleBtn, repeatBtn;
+let songTitleDisplay, artistNameDisplay, fileSelector, songsList, songsHeader, songsArrow, sortBtn;
+let progressBar, currentTimeDisplay, durationTimeDisplay, volumeBar, albumArt;
+let lyricsHeader, lyricsArrow, lyricsContainer, lyricsContent;
+let playlistsHeader, playlistsList, playlistsArrow;
 
 let playableSongs = [];
 let allFilesMap = new Map();
@@ -396,138 +375,143 @@ function toggleRepeat() {
 }
 
 // Event listener for when a song ends
-audioPlayer.addEventListener('ended', () => {
-    if (isRepeating) {
-        audioPlayer.play(); // Replay the same song
-    } else {
-        nextSong();
-    }
-});
-
-// Event listener for when the user selects a folder
-fileSelector.addEventListener('change', async (event) => {
-    const files = event.target.files;
-    if (files.length === 0) return;
-    
-    const supportedAudioExtensions = ['.mp3', '.m4a', '.wav', '.ogg'];
-    const allFileArray = Array.from(files);
-    
-    // Clear previous data
-    allFilesMap.clear();
-    availableSongs = [];
-    availablePlaylists = [];
-    
-    // Map all files by name for easy lookup
-    allFileArray.forEach(file => {
-        allFilesMap.set(file.name, file);
-        const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-        if (supportedAudioExtensions.includes(extension)) {
-            availableSongs.push({ name: file.name, file: file, src: URL.createObjectURL(file) });
-        } else if (extension === '.m3u') {
-            availablePlaylists.push(file);
+function setupAudioEventListeners() {
+    audioPlayer.addEventListener('ended', () => {
+        if (isRepeating) {
+            audioPlayer.play(); // Replay the same song
+        } else {
+            nextSong();
         }
     });
 
-    // Fetch metadata and lyrics for all available songs
-    const processPromises = availableSongs.map(async (song) => {
-        song.tags = await getMetadata(song.file);
-        const baseName = song.name.split('.').slice(0, -1).join('.');
-        const lrcFileName = baseName + '.lrc';
-        if (allFilesMap.has(lrcFileName)) {
-            const lrcFile = allFilesMap.get(lrcFileName);
-            const lrcContent = await getLyrics(lrcFile);
-            song.lyrics = parseLrc(lrcContent);
-        }
+    // Event listener for when the song's metadata is loaded
+    audioPlayer.addEventListener('loadedmetadata', () => {
+        const duration = audioPlayer.duration;
+        progressBar.max = duration;
+        durationTimeDisplay.textContent = formatTime(duration);
     });
 
-    await Promise.all(processPromises);
+    // Event listener to update the progress bar and current time as the song plays
+    audioPlayer.addEventListener('timeupdate', () => {
+        const currentTime = audioPlayer.currentTime;
+        progressBar.value = currentTime;
+        currentTimeDisplay.textContent = formatTime(currentTime);
 
-    if (availableSongs.length > 0) {
-        // Initially populate with all songs
-        playableSongs = [...availableSongs];
-        originalOrder = [...playableSongs];
-        currentSongIndex = 0;
-        loadSong(currentSongIndex);
-        renderSongsList(playableSongs);
-        playPause(); // Start playing the first song if not already playing
-    } else {
-        songTitleDisplay.textContent = "No music files found.";
-        artistNameDisplay.textContent = "";
-        songsList.innerHTML = '<li class="p-3 text-center text-gray-400">No music files found.</li>';
-    }
-    
-    renderPlaylists(availablePlaylists);
-});
-
-// Event listener for collapsible songs list header
-songsHeader.addEventListener('click', () => {
-    songsList.classList.toggle('hidden');
-    songsArrow.classList.toggle('rotate-180');
-});
-
-// Event listener for collapsible playlists header
-playlistsHeader.addEventListener('click', () => {
-    playlistsList.classList.toggle('hidden');
-    playlistsArrow.classList.toggle('rotate-180');
-});
-
-// Event listener for collapsible lyrics header
-lyricsHeader.addEventListener('click', () => {
-    lyricsContainer.classList.toggle('hidden');
-    lyricsArrow.classList.toggle('rotate-180');
-});
-
-// Event listener for when the song's metadata is loaded
-audioPlayer.addEventListener('loadedmetadata', () => {
-    const duration = audioPlayer.duration;
-    progressBar.max = duration;
-    durationTimeDisplay.textContent = formatTime(duration);
-});
-
-// Event listener to update the progress bar and current time as the song plays
-audioPlayer.addEventListener('timeupdate', () => {
-    const currentTime = audioPlayer.currentTime;
-    progressBar.value = currentTime;
-    currentTimeDisplay.textContent = formatTime(currentTime);
-
-    // Update lyrics
-    if (parsedLyrics.length > 0) {
-        const currentLyricIndex = parsedLyrics.findIndex((line, index) => {
-            const nextLineTime = index + 1 < parsedLyrics.length ? parsedLyrics[index + 1].time : Infinity;
-            return currentTime >= line.time && currentTime < nextLineTime;
-        });
-        if (currentLyricIndex !== -1) {
-            document.querySelectorAll('#lyrics-content p').forEach((p) => {
-                p.classList.remove('lyric-active');
+        // Update lyrics
+        if (parsedLyrics.length > 0) {
+            const currentLyricIndex = parsedLyrics.findIndex((line, index) => {
+                const nextLineTime = index + 1 < parsedLyrics.length ? parsedLyrics[index + 1].time : Infinity;
+                return currentTime >= line.time && currentTime < nextLineTime;
             });
-            const activeLyric = document.querySelector(`#lyrics-content p[data-index="${currentLyricIndex}"]`);
-            if (activeLyric) {
-                activeLyric.classList.add('lyric-active');
-                activeLyric.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (currentLyricIndex !== -1) {
+                document.querySelectorAll('#lyrics-content p').forEach((p) => {
+                    p.classList.remove('lyric-active');
+                });
+                const activeLyric = document.querySelector(`#lyrics-content p[data-index="${currentLyricIndex}"]`);
+                if (activeLyric) {
+                    activeLyric.classList.add('lyric-active');
+                    activeLyric.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         }
-    }
-});
+    });
+}
 
-// Event listener for seeking functionality
-progressBar.addEventListener('input', () => {
-    if (playableSongs.length > 0) {
-        audioPlayer.currentTime = progressBar.value;
-    }
-});
+// Function to setup UI event listeners
+function setupUIEventListeners() {
+    // Event listener for when the user selects a folder
+    fileSelector.addEventListener('change', async (event) => {
+        const files = event.target.files;
+        if (files.length === 0) return;
+        
+        const supportedAudioExtensions = ['.mp3', '.m4a', '.wav', '.ogg'];
+        const allFileArray = Array.from(files);
+        
+        // Clear previous data
+        allFilesMap.clear();
+        availableSongs = [];
+        availablePlaylists = [];
+        
+        // Map all files by name for easy lookup
+        allFileArray.forEach(file => {
+            allFilesMap.set(file.name, file);
+            const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+            if (supportedAudioExtensions.includes(extension)) {
+                availableSongs.push({ name: file.name, file: file, src: URL.createObjectURL(file) });
+            } else if (extension === '.m3u') {
+                availablePlaylists.push(file);
+            }
+        });
 
-// Event listener for volume control
-volumeBar.addEventListener('input', (event) => {
-    audioPlayer.volume = event.target.value;
-});
+        // Fetch metadata and lyrics for all available songs
+        const processPromises = availableSongs.map(async (song) => {
+            song.tags = await getMetadata(song.file);
+            const baseName = song.name.split('.').slice(0, -1).join('.');
+            const lrcFileName = baseName + '.lrc';
+            if (allFilesMap.has(lrcFileName)) {
+                const lrcFile = allFilesMap.get(lrcFileName);
+                const lrcContent = await getLyrics(lrcFile);
+                song.lyrics = parseLrc(lrcContent);
+            }
+        });
 
-// Add event listeners to the buttons
-playPauseBtn.addEventListener('click', playPause);
-nextBtn.addEventListener('click', nextSong);
-prevBtn.addEventListener('click', prevSong);
-shuffleBtn.addEventListener('click', toggleShuffle);
-repeatBtn.addEventListener('click', toggleRepeat);
-sortBtn.addEventListener('click', sortPlaylist);
+        await Promise.all(processPromises);
+
+        if (availableSongs.length > 0) {
+            // Initially populate with all songs
+            playableSongs = [...availableSongs];
+            originalOrder = [...playableSongs];
+            currentSongIndex = 0;
+            loadSong(currentSongIndex);
+            renderSongsList(playableSongs);
+            playPause(); // Start playing the first song if not already playing
+        } else {
+            songTitleDisplay.textContent = "No music files found.";
+            artistNameDisplay.textContent = "";
+            songsList.innerHTML = '<li class="p-3 text-center text-gray-400">No music files found.</li>';
+        }
+        
+        renderPlaylists(availablePlaylists);
+    });
+
+    // Event listener for collapsible songs list header
+    songsHeader.addEventListener('click', () => {
+        songsList.classList.toggle('hidden');
+        songsArrow.classList.toggle('rotate-180');
+    });
+
+    // Event listener for collapsible playlists header
+    playlistsHeader.addEventListener('click', () => {
+        playlistsList.classList.toggle('hidden');
+        playlistsArrow.classList.toggle('rotate-180');
+    });
+
+    // Event listener for collapsible lyrics header
+    lyricsHeader.addEventListener('click', () => {
+        lyricsContainer.classList.toggle('hidden');
+        lyricsArrow.classList.toggle('rotate-180');
+    });
+
+    // Event listener for seeking functionality
+    progressBar.addEventListener('input', () => {
+        if (playableSongs.length > 0) {
+            audioPlayer.currentTime = progressBar.value;
+        }
+    });
+
+    // Event listener for volume control
+    volumeBar.addEventListener('input', (event) => {
+        audioPlayer.volume = event.target.value;
+    });
+
+    // Add event listeners to the buttons
+    playPauseBtn.addEventListener('click', playPause);
+    nextBtn.addEventListener('click', nextSong);
+    prevBtn.addEventListener('click', prevSong);
+    shuffleBtn.addEventListener('click', toggleShuffle);
+    repeatBtn.addEventListener('click', toggleRepeat);
+    sortBtn.addEventListener('click', sortPlaylist);
+}
 
 // Function to set up the Media Session action handlers once
 function setupMediaSession() {
@@ -548,11 +532,45 @@ function setupMediaSession() {
 }
 
 // Initial state
-function initializePlayer() {
+export function initializePlayer() {
+    // Get all necessary DOM elements
+    audioPlayer = document.getElementById('audio-player');
+    playPauseBtn = document.getElementById('play-pause-btn');
+    playIcon = document.getElementById('play-icon');
+    pauseIcon = document.getElementById('pause-icon');
+    nextBtn = document.getElementById('next-btn');
+    prevBtn = document.getElementById('prev-btn');
+    shuffleBtn = document.getElementById('shuffle-btn');
+    repeatBtn = document.getElementById('repeat-btn');
+    songTitleDisplay = document.getElementById('song-title');
+    artistNameDisplay = document.getElementById('artist-name');
+    fileSelector = document.getElementById('file-selector');
+    songsList = document.getElementById('songs-list');
+    songsHeader = document.getElementById('songs-header');
+    songsArrow = document.getElementById('songs-arrow');
+    sortBtn = document.getElementById('sort-btn');
+    progressBar = document.getElementById('progress-bar');
+    currentTimeDisplay = document.getElementById('current-time');
+    durationTimeDisplay = document.getElementById('duration-time');
+    volumeBar = document.getElementById('volume-bar');
+    albumArt = document.getElementById('album-art');
+    lyricsHeader = document.getElementById('lyrics-header');
+    lyricsArrow = document.getElementById('lyrics-arrow');
+    lyricsContainer = document.getElementById('lyrics-container');
+    lyricsContent = document.getElementById('lyrics-content');
+    playlistsHeader = document.getElementById('playlists-header');
+    playlistsList = document.getElementById('playlists-list');
+    playlistsArrow = document.getElementById('playlists-arrow');
+
+    // Initialize UI state
     songTitleDisplay.textContent = "No song selected";
     artistNameDisplay.textContent = "";
     audioPlayer.volume = volumeBar.value;
     renderSongsList([]);
     renderPlaylists([]);
+    
+    // Setup event listeners
+    setupAudioEventListeners();
+    setupUIEventListeners();
     setupMediaSession();
 };

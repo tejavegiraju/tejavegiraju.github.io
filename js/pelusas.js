@@ -11,6 +11,8 @@ export function attachPelusasEvents() {
 export function initializePelusas() {
     const playerNamesInput = prompt('Enter player names (comma-separated):');
     if (!playerNamesInput) {
+        alert('Player names are required to start the game.');
+        initializePelusas();
         return;
     }
     const playerNames = playerNamesInput.split(',').map(name => name.trim());

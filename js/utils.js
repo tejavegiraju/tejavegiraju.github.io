@@ -1,8 +1,24 @@
 import { initializePelusas, attachPelusasEvents } from './pelusas.js';
 import { initializeTicTac, attachTicTacEvents } from './ticktac.js';
 import { initializeSNL, setupSNLGame, attachSNLGameEvents } from './snl.js';
+import { initializePlayer } from './player.js';
 
 const contentContainer = document.getElementById('content-container');
+
+async function loadPlayer() {
+    try {
+        const response = await fetch('player.html');
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const playerContent = doc.querySelector('main').innerHTML;
+        document.getElementById('player-main').innerHTML = playerContent;
+        // Initialize the music player
+        initializePlayer();
+    } catch (error) {
+        console.error('Error loading music player:', error);
+    }
+}
 
 // Function to handle dynamic page loading
 async function loadPage(url) {
@@ -63,7 +79,14 @@ function handleNavLinks() {
         link.removeEventListener('click', attachNavLinkClick); // Remove any existing listeners
         link.addEventListener('click', attachNavLinkClick);
     });
+
+    if (!playerLoaded) {
+        loadPlayer();
+        playerLoaded = true;
+    }
 }
+
+let playerLoaded = false; 
 
 // Event listener to handle navigation links
 document.addEventListener('DOMContentLoaded', () => {

@@ -291,9 +291,37 @@ function highlightCurrentSong() {
     });
 }
 
+async function loadFilesFromResource() {
+    console.log('Loading songs from resource...');
+    const response = await fetch('public/aud/playlist.json');
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const songNames = await response.json();
+    
+    // Construct song objects from the song names in the JSON file
+    playableSongs = songNames.map(name => ({
+        name: name,
+        src: `public/aud/${name}` // Construct the path
+    }));
+
+    if (playableSongs.length > 0) {
+        originalOrder = [...playableSongs];
+        currentSongIndex = Math.floor(Math.random() * (playableSongs.length + 1));
+        renderSongsList(playableSongs);
+        loadSong(currentSongIndex);
+        playPause();
+    } else {
+        songsList.innerHTML = '<li class="p-3 text-center text-red-400">Default playlist is empty.</li>';
+    }
+}
+
 // Function to toggle play/pause
 function playPause() {
-    if (playableSongs.length === 0) return;
+    if (playableSongs.length === 0) {
+        loadFilesFromResource();
+        return;
+    }
     if (isPlaying) {
         audioPlayer.pause();
         playIcon.classList.remove('hidden');
@@ -468,7 +496,7 @@ function setupUIEventListeners() {
             playableSongs = [...availableSongs];
             originalOrder = [...playableSongs];
             // Randomly select a song to start with
-            currentSongIndex = Math.floor(Math.random() * (availableSongs.length + 1));;
+            currentSongIndex = Math.floor(Math.random() * (availableSongs.length + 1));
             loadSong(currentSongIndex);
             renderSongsList(playableSongs);
             playPause(); // Start playing the first song if not already playing

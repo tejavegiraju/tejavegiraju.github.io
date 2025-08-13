@@ -70,7 +70,7 @@ input[type="range"]::-moz-range-thumb {
 /* Styles for the minimized state */
 #player-container.minimized {
     width: 200px; /* Adjust as needed */
-    opacity: 0.4;
+    opacity: 0.5;
 }
 
 /* Styles for the header when minimized */

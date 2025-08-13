@@ -5,50 +5,60 @@ import { initializePlayer } from './player.js';
 
 const contentContainer = document.getElementById('content-container');
 
-async function loadPlayer() {
-    try {
-        const response = await fetch('player.html');
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const playerContent = doc.querySelector('main').innerHTML;
-        document.getElementById('player-main').innerHTML = playerContent;
-        // Initialize the music player
-        initializePlayer();
-    } catch (error) {
-        console.error('Error loading music player:', error);
-    }
-}
-
-// Function to handle dynamic page loading
-async function loadPage(url) {
+async function getPageContent(url, main = 'main') {
     try {
         const response = await fetch(url);
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const content = doc.querySelector('main').innerHTML;
-        contentContainer.innerHTML = content;
-        
-        // Update the URL in the browser's address bar
-        window.history.pushState({}, '', url);     
-        handleNavLinks();
-        // Check the URL and initialize the correct game
-        if (url === 'pelusas.html') {
-            initializePelusas();
-            attachPelusasEvents();
-        } else if (url === 'tictac.html') {
-            initializeTicTac();
-            attachTicTacEvents();
-        } else if (url === 'snl.html') {
-            initializeSNL();
-            setupSNLGame();
-            attachSNLGameEvents();
-        }
+        const content = doc.querySelector(main).innerHTML;
+        return content;
     } catch (error) {
         console.error('Error loading page:', error);
-        contentContainer.innerHTML = '<h1 class="text-3xl font-bold text-red-500">Error loading page.</h1><p class="text-red-300 mt-2">Please ensure the file exists and try again.</p>';
+        return '';
+    }
+}
+
+// Function to load the player content
+async function loadPlayer() {
+    if (playerLoaded) {
+        return; // Player is already loaded
+    }
+    playerLoaded = true; // Set the flag to true to prevent reloading
+    const playerContent = await getPageContent('player.html');
+    if (!playerContent) {
+        console.error('Failed to load player content');
+        return;
+    }
+    document.getElementById('player-main').innerHTML = playerContent;
+    // Initialize the music player
+    initializePlayer();
+}
+
+// Function to handle dynamic page loading
+async function loadPage(url) {
+    const content = await getPageContent(url);
+    if (!content) {
+        contentContainer.innerHTML = '<h1 class="text-3xl font-bold text-red-500">Page Not Found</h1><p class="text-red-300 mt-2">The requested page does not exist.</p>';
         window.history.pushState({}, '', '#error');
+        return;
+    }
+    contentContainer.innerHTML = content;
+    
+    // Update the URL in the browser's address bar
+    window.history.pushState({}, '', url);     
+    handleNavLinks();
+    // Check the URL and initialize the correct game
+    if (url === 'pelusas.html') {
+        initializePelusas();
+        attachPelusasEvents();
+    } else if (url === 'tictac.html') {
+        initializeTicTac();
+        attachTicTacEvents();
+    } else if (url === 'snl.html') {
+        initializeSNL();
+        setupSNLGame();
+        attachSNLGameEvents();
     }
 }
 
@@ -80,10 +90,7 @@ function handleNavLinks() {
         link.addEventListener('click', attachNavLinkClick);
     });
 
-    if (!playerLoaded) {
-        loadPlayer();
-        playerLoaded = true;
-    }
+    loadPlayer();
 }
 
 let playerLoaded = false; 

@@ -22,8 +22,9 @@
         </div>
         <p id="game-status" class="text-xl font-semibold mb-4 text-center">Game not started</p>
         <div id="controls" class="flex justify-center gap-4 mb-6">
-            <button id="draw-risk" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition-colors">Draw/Risk</button>
-            <button id="skip" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full transition-colors" disabled="">Skip</button>
+            <button id="draw-risk" class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-full transition-colors">Draw/Risk</button>
+            <button id="skip" class="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-full transition-colors" disabled="">Skip</button>
+            <button id="reset-pelusas" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition-colors">Reset Game</button>
         </div>
         <div id="players" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
             <!-- Player decks will be dynamically generated -->

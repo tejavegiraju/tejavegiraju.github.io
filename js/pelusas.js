@@ -3,29 +3,245 @@ let currentPlayerIndex = 0;
 let drawCards = [];
 let discardedCards = [];
 
+// Custom dialog functions
+function createDialog() {
+    const dialog = document.createElement('div');
+    dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    dialog.innerHTML = `
+        <div class="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div id="dialog-content"></div>
+            <div id="dialog-buttons" class="flex justify-end space-x-2 mt-4"></div>
+        </div>
+    `;
+    document.body.appendChild(dialog);
+    return dialog;
+}
+
+function showAlert(message) {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        content.innerHTML = `<p class="text-white mb-4">${message}</p>`;
+        
+        const okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded';
+        okButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve();
+        };
+        
+        buttons.appendChild(okButton);
+        okButton.focus();
+    });
+}
+
+function showPrompt(message, defaultValue = '') {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        content.innerHTML = `
+            <p class="text-white mb-4">${message}</p>
+            <input type="text" id="prompt-input" value="${defaultValue}" 
+                   class="w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none">
+        `;
+        
+        const input = content.querySelector('#prompt-input');
+        
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.className = 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2';
+        cancelButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(null);
+        };
+        
+        const okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded';
+        okButton.onclick = () => {
+            const value = input.value.trim();
+            document.body.removeChild(dialog);
+            resolve(value || null);
+        };
+        
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                okButton.click();
+            } else if (e.key === 'Escape') {
+                cancelButton.click();
+            }
+        });
+        
+        buttons.appendChild(cancelButton);
+        buttons.appendChild(okButton);
+        input.focus();
+        input.select();
+    });
+}
+
+function showPlayerPrompt() {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        content.innerHTML = `
+            <h3 class="text-white text-lg font-bold mb-4">Enter Player Names</h3>
+            <p class="text-gray-300 text-sm mb-4">At least 2 players required, maximum 6 players allowed</p>
+            <div id="player-inputs" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="player-input-group">
+                        <label class="text-white text-sm block mb-1">Player 1 <span class="text-red-400">*</span></label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 1 name" required>
+                    </div>
+                    <div class="player-input-group">
+                        <label class="text-white text-sm block mb-1">Player 2 <span class="text-red-400">*</span></label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 2 name" required>
+                    </div>
+                    <div class="player-input-group" style="display: none;">
+                        <label class="text-white text-sm block mb-1">Player 3</label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 3 name">
+                    </div>
+                    <div class="player-input-group" style="display: none;">
+                        <label class="text-white text-sm block mb-1">Player 4</label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 4 name">
+                    </div>
+                    <div class="player-input-group" style="display: none;">
+                        <label class="text-white text-sm block mb-1">Player 5</label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 5 name">
+                    </div>
+                    <div class="player-input-group" style="display: none;">
+                        <label class="text-white text-sm block mb-1">Player 6</label>
+                        <input type="text" class="player-input w-full p-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-purple-500 outline-none" placeholder="Enter player 6 name">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-4">
+                <button id="add-player-btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Add Player</button>
+                <button id="remove-player-btn" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm" style="display: none;">Remove Player</button>
+            </div>
+        `;
+        
+        const playerInputs = content.querySelectorAll('.player-input');
+        const addButton = content.querySelector('#add-player-btn');
+        const removeButton = content.querySelector('#remove-player-btn');
+        const inputGroups = content.querySelectorAll('.player-input-group');
+        
+        let visibleInputs = 2;
+        
+        function updateButtons() {
+            addButton.style.display = visibleInputs >= 6 ? 'none' : 'block';
+            removeButton.style.display = visibleInputs <= 2 ? 'none' : 'block';
+        }
+        
+        addButton.onclick = () => {
+            if (visibleInputs < 6) {
+                inputGroups[visibleInputs].style.display = 'block';
+                visibleInputs++;
+                updateButtons();
+            }
+        };
+        
+        removeButton.onclick = () => {
+            if (visibleInputs > 2) {
+                visibleInputs--;
+                inputGroups[visibleInputs].style.display = 'none';
+                playerInputs[visibleInputs].value = '';
+                updateButtons();
+            }
+        };
+        
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.className = 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2';
+        cancelButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(null);
+        };
+        
+        const okButton = document.createElement('button');
+        okButton.textContent = 'Start Game';
+        okButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded';
+        okButton.onclick = () => {
+            const names = [];
+            for (let i = 0; i < visibleInputs; i++) {
+                const name = playerInputs[i].value.trim();
+                if (i < 2 && !name) {
+                    playerInputs[i].focus();
+                    playerInputs[i].classList.add('border-red-500');
+                    return;
+                }
+                if (name) {
+                    names.push(name);
+                }
+            }
+            
+            // Check for duplicate names
+            const uniqueNames = [...new Set(names)];
+            if (uniqueNames.length !== names.length) {
+                showAlert('Please ensure all player names are unique.');
+                return;
+            }
+            
+            if (names.length < 2) {
+                showAlert('At least 2 players are required to start the game.');
+                return;
+            }
+            
+            document.body.removeChild(dialog);
+            resolve(names.join(','));
+        };
+        
+        // Add Enter key support
+        playerInputs.forEach((input, index) => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (index < visibleInputs - 1) {
+                        playerInputs[index + 1].focus();
+                    } else {
+                        okButton.click();
+                    }
+                }
+            });
+            
+            input.addEventListener('input', () => {
+                input.classList.remove('border-red-500');
+            });
+        });
+        
+        buttons.appendChild(cancelButton);
+        buttons.appendChild(okButton);
+        
+        // Focus on first input
+        playerInputs[0].focus();
+    });
+}
+
 export function attachPelusasEvents() {
     document.getElementById('draw-risk').addEventListener('click', drawRisk);
     document.getElementById('skip').addEventListener('click', skipTurn);
+    document.getElementById('reset-pelusas').addEventListener('click', initializePelusas);
 }
 
 export function initializePelusas() {
-    const playerNamesInput = prompt('Enter player names (comma-separated):');
-    if (!playerNamesInput) {
-        alert('Player names are required to start the game.');
-        initializePelusas();
-        return;
-    }
-    const playerNames = playerNamesInput.split(',').map(name => name.trim());
-    const uniquePlayerNames = [...new Set(playerNames.filter(name => name))]; // Ensure unique names
-    if (uniquePlayerNames.length < 2 || uniquePlayerNames.length > 6) {
-        alert('Please enter between 2 and 6 player names.');
-        initializePelusas();
-        return;
-    }
-    players = uniquePlayerNames.map(name => ({ name, cards: [], score: 0 }));
-    drawCards = generateDeck();
-    discardedCards = [];
-    updateUI();
+    showPlayerPrompt().then(playerNamesInput => {
+        if (!playerNamesInput) {
+            return; // User cancelled
+        }
+        const playerNames = playerNamesInput.split(',').map(name => name.trim());
+        const uniquePlayerNames = [...new Set(playerNames.filter(name => name))]; // Ensure unique names
+        
+        players = uniquePlayerNames.map(name => ({ name, cards: [], score: 0 }));
+        drawCards = generateDeck();
+        discardedCards = [];
+        currentPlayerIndex = 0;
+        updateUI();
+    });
 }
 
 function generateDeck() {
@@ -56,9 +272,10 @@ function drawRisk() {
         && currentPlayer.cards.filter(c => c === card).length > 1) {
         discardedCards.push(...currentPlayer.cards);
         currentPlayer.cards = [];
-        alert(`${currentPlayer.name} picked duplicate card ${card}! Cards moved to discarded deck.`);
-        //next player's turn
-        skipTurn();
+        showAlert(`${currentPlayer.name} picked duplicate card ${card}! Cards moved to discarded deck.`).then(() => {
+            //next player's turn
+            skipTurn();
+        });
     }
     updateUI();
     checkSkipEligibility();

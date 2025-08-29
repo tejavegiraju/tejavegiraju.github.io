@@ -3,6 +3,144 @@ let currentPlayerIndex = 0;
 let drawCards = [];
 let discardedCards = [];
 
+// Storage key for game state
+const GAME_STATE_KEY = 'pelusas-game-state';
+
+// Save game state to session storage
+function saveGameState() {
+    const gameState = {
+        players,
+        currentPlayerIndex,
+        drawCards,
+        discardedCards,
+        timestamp: Date.now()
+    };
+    try {
+        sessionStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
+    } catch (error) {
+        console.warn('Failed to save game state:', error);
+    }
+}
+
+// Load game state from session storage
+function loadGameState() {
+    try {
+        const savedState = sessionStorage.getItem(GAME_STATE_KEY);
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+            // Check if the saved state is not too old (24 hours)
+            const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            if (Date.now() - gameState.timestamp < maxAge) {
+                return gameState;
+            } else {
+                // Clear old state
+                clearGameState();
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load game state:', error);
+        clearGameState();
+    }
+    return null;
+}
+
+// Clear game state from session storage
+function clearGameState() {
+    try {
+        sessionStorage.removeItem(GAME_STATE_KEY);
+    } catch (error) {
+        console.warn('Failed to clear game state:', error);
+    }
+}
+
+// Restore game state
+function restoreGameState(gameState) {
+    players = gameState.players || [];
+    currentPlayerIndex = gameState.currentPlayerIndex || 0;
+    drawCards = gameState.drawCards || [];
+    discardedCards = gameState.discardedCards || [];
+}
+
+// Check if there's a saved game
+function hasSavedGame() {
+    return loadGameState() !== null;
+}
+
+// Show continue game dialog
+function showContinueGameDialog() {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        // Get saved game data to show player info
+        const savedState = loadGameState();
+        let playerInfo = '';
+        
+        if (savedState && savedState.players) {
+            const playerNames = savedState.players.map(player => player.name).join(', ');
+            const currentPlayerName = savedState.players[savedState.currentPlayerIndex]?.name || 'Unknown';
+            const cardsRemaining = savedState.drawCards?.length || 0;
+            
+            playerInfo = `
+                <div class="bg-gray-700 rounded-lg p-3 mb-4 text-left">
+                    <p class="text-sm text-gray-300 mb-2"><strong>Players:</strong> ${playerNames}</p>
+                    <p class="text-sm text-gray-300 mb-2"><strong>Current Turn:</strong> ${currentPlayerName}</p>
+                    <p class="text-sm text-gray-300"><strong>Cards Remaining:</strong> ${cardsRemaining}</p>
+                </div>
+            `;
+        }
+        
+        content.innerHTML = `
+            <div class="text-center">
+                <div class="text-4xl mb-4">🎮</div>
+                <h3 class="text-white text-lg font-bold mb-4">Continue Previous Game?</h3>
+                <p class="text-gray-300 mb-4">We found a saved game in progress. Would you like to continue where you left off?</p>
+                ${playerInfo}
+            </div>
+        `;
+        
+        const newGameButton = document.createElement('button');
+        newGameButton.textContent = 'New Game';
+        newGameButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded mr-2';
+        newGameButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve('new');
+        };
+        
+        const continueButton = document.createElement('button');
+        continueButton.textContent = 'Continue Game';
+        continueButton.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold';
+        continueButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve('continue');
+        };
+        
+        // Add keyboard support
+        dialog.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                continueButton.click();
+            } else if (e.key === 'Escape') {
+                newGameButton.click();
+            }
+        });
+        
+        // Close on background click (counts as new game)
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                document.body.removeChild(dialog);
+                resolve('new');
+            }
+        });
+        
+        buttons.appendChild(newGameButton);
+        buttons.appendChild(continueButton);
+        
+        // Focus on continue button by default
+        continueButton.focus();
+    });
+}
+
 // Custom dialog functions
 function createDialog() {
     const dialog = document.createElement('div');
@@ -81,6 +219,52 @@ function showPrompt(message, defaultValue = '') {
         buttons.appendChild(okButton);
         input.focus();
         input.select();
+    });
+}
+
+function showConfirm(title, message, confirmText = 'Confirm', cancelText = 'Cancel') {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        content.innerHTML = `
+            <h3 class="text-white text-lg font-bold mb-4">${title}</h3>
+            <p class="text-gray-300 mb-4">${message}</p>
+        `;
+        
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = cancelText;
+        cancelButton.className = 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2';
+        cancelButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(false);
+        };
+        
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = confirmText;
+        confirmButton.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-semibold';
+        confirmButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(true);
+        };
+        
+        // Add keyboard support
+        document.addEventListener('keydown', function keyHandler(e) {
+            if (e.key === 'Enter') {
+                confirmButton.click();
+                document.removeEventListener('keydown', keyHandler);
+            } else if (e.key === 'Escape') {
+                cancelButton.click();
+                document.removeEventListener('keydown', keyHandler);
+            }
+        });
+        
+        buttons.appendChild(cancelButton);
+        buttons.appendChild(confirmButton);
+        
+        // Focus on cancel button by default for safety
+        cancelButton.focus();
     });
 }
 
@@ -225,10 +409,47 @@ function showPlayerPrompt() {
 export function attachPelusasEvents() {
     document.getElementById('draw-risk').addEventListener('click', drawRisk);
     document.getElementById('skip').addEventListener('click', skipTurn);
-    document.getElementById('reset-pelusas').addEventListener('click', initializePelusas);
+    document.getElementById('reset-pelusas').addEventListener('click', confirmResetPelusas);
+}
+
+// Confirmation dialog for resetting the game
+async function confirmResetPelusas() {
+    const confirmed = await showConfirm(
+        'Reset Game', 
+        'Are you sure you want to reset the game? All current progress will be lost.',
+        'Reset',
+        'Cancel'
+    );
+    
+    if (confirmed) {
+        clearGameState(); // Clear saved state
+        initializePelusas();
+    }
 }
 
 export function initializePelusas() {
+    // Check if there's a saved game
+    if (hasSavedGame()) {
+        showContinueGameDialog().then(choice => {
+            if (choice === 'continue') {
+                const savedState = loadGameState();
+                if (savedState) {
+                    restoreGameState(savedState);
+                    updateUI();
+                    return;
+                }
+            }
+            // If new game or failed to restore, start fresh
+            clearGameState(); // Clear any existing saved state
+            startNewGame();
+        });
+    } else {
+        startNewGame();
+    }
+}
+
+// Start a new game
+function startNewGame() {
     showPlayerPrompt().then(playerNamesInput => {
         if (!playerNamesInput) {
             return; // User cancelled
@@ -241,6 +462,7 @@ export function initializePelusas() {
         discardedCards = [];
         currentPlayerIndex = 0;
         updateUI();
+        saveGameState(); // Save initial state
     });
 }
 
@@ -279,6 +501,7 @@ function drawRisk() {
     }
     updateUI();
     checkSkipEligibility();
+    saveGameState(); // Save state after each action
 }
 
 function skipTurn() {
@@ -286,6 +509,7 @@ function skipTurn() {
     startTurn();
     document.getElementById('skip').disabled = true;
     updateUI();
+    saveGameState(); // Save state after each action
 }
 
 function checkSkipEligibility() {
@@ -367,6 +591,9 @@ function updateUI() {
         document.getElementById('game-status').textContent = `Game Over!
             Winner is ${winner.name} with score ${winner.score}`;
         document.getElementById(`player-${winner.name}`).classList.add('bg-green-600', 'text-white');
+        
+        // Clear saved state when game ends
+        clearGameState();
     }
 }
 
@@ -377,4 +604,10 @@ function transferCards(fromPlayer, cardNumber) {
     fromPlayer.cards = fromPlayer.cards.filter(card => card !== cardNumber);
     // alert(`${currentPlayer.name} took ${cardsToTransfer.length} card(s) of number ${cardNumber} from ${fromPlayer.name}`);
     skipTurn();
+    saveGameState(); // Save state after each action
 }
+
+// Auto-save game state every minute
+setInterval(() => {
+    saveGameState();
+}, 60 * 1000);

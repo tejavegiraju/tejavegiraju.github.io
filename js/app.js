@@ -150,9 +150,9 @@ function addRefreshButton() {
 }
 
 // Show refresh button on page load
-window.addEventListener('load', () => {
-    setTimeout(addRefreshButton, 2000); // Show after 2 seconds
-});
+// window.addEventListener('load', () => {
+//     setTimeout(addRefreshButton, 2000); // Show after 2 seconds
+// });
 
 async function getPageContent(url, main = 'main') {
     try {

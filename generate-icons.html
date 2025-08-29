@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512" style="display: none;"></canvas>
+    <script>
+        const sizes = [16, 32, 72, 96, 128, 144, 152, 180, 192, 384, 512];
+        
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Border radius effect (rounded corners)
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.25);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Main circle (music/game symbol)
+            ctx.fillStyle = '#9333ea';
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.4, size * 0.15, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Game controller body
+            ctx.fillStyle = '#9333ea';
+            ctx.fillRect(size * 0.35, size * 0.6, size * 0.3, size * 0.23);
+            
+            // Controller buttons
+            ctx.fillStyle = '#111827';
+            const buttonSize = size * 0.03;
+            ctx.beginPath();
+            ctx.arc(size * 0.4, size * 0.7, buttonSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.7, buttonSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size * 0.6, size * 0.7, buttonSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Side diamonds (decorative)
+            ctx.fillStyle = '#9333ea';
+            ctx.save();
+            ctx.translate(size * 0.2, size * 0.3);
+            ctx.rotate(Math.PI / 4);
+            ctx.fillRect(-size * 0.05, -size * 0.05, size * 0.1, size * 0.1);
+            ctx.restore();
+            
+            ctx.save();
+            ctx.translate(size * 0.8, size * 0.3);
+            ctx.rotate(Math.PI / 4);
+            ctx.fillRect(-size * 0.05, -size * 0.05, size * 0.1, size * 0.1);
+            ctx.restore();
+            
+            // Download the icon
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}x${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Generate all icon sizes
+        sizes.forEach((size, index) => {
+            setTimeout(() => generateIcon(size), index * 100);
+        });
+    </script>
+</body>
+</html>

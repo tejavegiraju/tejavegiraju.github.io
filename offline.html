@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Ollo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 text-white bg-gray-900">
+    <div class="text-center">
+        <div class="mb-8">
+            <svg class="w-24 h-24 mx-auto text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+        <h1 class="text-4xl font-bold mb-4 text-purple-400">You're Offline</h1>
+        <p class="text-xl text-gray-300 mb-8 max-w-md">
+            Don't worry! You can still enjoy your cached games and music while offline.
+        </p>
+        <div class="space-y-4">
+            <button onclick="window.history.back()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+                Go Back
+            </button>
+            <br>
+            <a href="/" class="inline-block bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors">
+                Go Home
+            </a>
+        </div>
+        <div class="mt-8 text-sm text-gray-400">
+            <p>🎮 Games are available offline</p>
+            <p>🎵 Cached music continues to play</p>
+        </div>
+    </div>
+
+    <script>
+        // Check for network connection periodically
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }
+        
+        // Check every 5 seconds
+        setInterval(checkConnection, 5000);
+        
+        // Also check when the user comes back online
+        window.addEventListener('online', checkConnection);
+    </script>
+</body>
+</html>

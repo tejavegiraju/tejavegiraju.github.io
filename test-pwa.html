@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Test - Ollo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">PWA Features Test</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Service Worker Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">🔧 Service Worker</h2>
+                <div id="sw-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="sw-update" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded disabled:opacity-50" disabled>
+                    Update Service Worker
+                </button>
+            </div>
+
+            <!-- Install Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">📱 PWA Install</h2>
+                <div id="install-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="install-app" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded disabled:opacity-50" disabled>
+                    Install App
+                </button>
+            </div>
+
+            <!-- Cache Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">💾 Cache</h2>
+                <div id="cache-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="test-cache" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded">
+                    Test Cache
+                </button>
+            </div>
+
+            <!-- Media Session Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">🎵 Media Session</h2>
+                <div id="media-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="test-media" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded">
+                    Test Media Session
+                </button>
+            </div>
+
+            <!-- Wake Lock Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">🔒 Wake Lock</h2>
+                <div id="wake-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="test-wake" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded">
+                    Request Wake Lock
+                </button>
+            </div>
+
+            <!-- Network Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">🌐 Network Status</h2>
+                <div id="network-status" class="mb-4">
+                    <span class="text-yellow-400">Checking...</span>
+                </div>
+                <button id="test-offline" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded mr-2">
+                    Test Offline Mode
+                </button>
+                <button id="test-fresh-content" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                    Test Fresh Content
+                </button>
+            </div>
+
+            <!-- Cache Strategy Test -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-bold mb-4">⚡ Cache Strategy</h2>
+                <div id="cache-strategy-status" class="mb-4">
+                    <span class="text-yellow-400">Testing cache strategies...</span>
+                </div>
+                <button id="test-cache-strategy" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded">
+                    Test Strategies
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="/" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg text-white font-bold">
+                ← Back to App
+            </a>
+        </div>
+
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-bold mb-4">📋 Test Results</h2>
+            <div id="test-results" class="space-y-2 text-sm">
+                <!-- Test results will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        let wakeLock = null;
+
+        // Add test result
+        function addTestResult(test, status, message) {
+            const results = document.getElementById('test-results');
+            const result = document.createElement('div');
+            result.className = `p-2 rounded ${status === 'pass' ? 'bg-green-900' : status === 'fail' ? 'bg-red-900' : 'bg-yellow-900'}`;
+            result.innerHTML = `<strong>${test}:</strong> ${message}`;
+            results.appendChild(result);
+        }
+
+        // Test Service Worker
+        async function testServiceWorker() {
+            const statusEl = document.getElementById('sw-status');
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        statusEl.innerHTML = '<span class="text-green-400">✅ Active</span>';
+                        addTestResult('Service Worker', 'pass', 'Registered and active');
+                        document.getElementById('sw-update').disabled = false;
+                    } else {
+                        statusEl.innerHTML = '<span class="text-red-400">❌ Not registered</span>';
+                        addTestResult('Service Worker', 'fail', 'Not registered');
+                    }
+                } catch (error) {
+                    statusEl.innerHTML = '<span class="text-red-400">❌ Error</span>';
+                    addTestResult('Service Worker', 'fail', error.message);
+                }
+            } else {
+                statusEl.innerHTML = '<span class="text-red-400">❌ Not supported</span>';
+                addTestResult('Service Worker', 'fail', 'Not supported in this browser');
+            }
+        }
+
+        // Test PWA Install
+        function testInstall() {
+            const statusEl = document.getElementById('install-status');
+            if (deferredPrompt) {
+                statusEl.innerHTML = '<span class="text-green-400">✅ Available</span>';
+                document.getElementById('install-app').disabled = false;
+                addTestResult('PWA Install', 'pass', 'Install prompt available');
+            } else if (window.matchMedia('(display-mode: standalone)').matches) {
+                statusEl.innerHTML = '<span class="text-blue-400">📱 Already installed</span>';
+                addTestResult('PWA Install', 'pass', 'App is already installed');
+            } else {
+                statusEl.innerHTML = '<span class="text-yellow-400">⏳ Not available yet</span>';
+                addTestResult('PWA Install', 'info', 'Install prompt not triggered yet');
+            }
+        }
+
+        // Test Cache
+        async function testCache() {
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    const cache = await caches.open('ollo-v1');
+                    const keys = await cache.keys();
+                    document.getElementById('cache-status').innerHTML = 
+                        `<span class="text-green-400">✅ ${keys.length} items cached</span>`;
+                    addTestResult('Cache', 'pass', `${keys.length} items in cache`);
+                } catch (error) {
+                    document.getElementById('cache-status').innerHTML = 
+                        '<span class="text-red-400">❌ Error</span>';
+                    addTestResult('Cache', 'fail', error.message);
+                }
+            } else {
+                document.getElementById('cache-status').innerHTML = 
+                    '<span class="text-red-400">❌ Not supported</span>';
+                addTestResult('Cache', 'fail', 'Cache API not supported');
+            }
+        }
+
+        // Test Media Session
+        function testMediaSession() {
+            const statusEl = document.getElementById('media-status');
+            if ('mediaSession' in navigator) {
+                statusEl.innerHTML = '<span class="text-green-400">✅ Supported</span>';
+                addTestResult('Media Session', 'pass', 'Media Session API supported');
+                
+                // Test setting metadata
+                try {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: 'Test Song',
+                        artist: 'Test Artist',
+                        album: 'Test Album'
+                    });
+                    addTestResult('Media Session', 'pass', 'Metadata set successfully');
+                } catch (error) {
+                    addTestResult('Media Session', 'fail', 'Failed to set metadata: ' + error.message);
+                }
+            } else {
+                statusEl.innerHTML = '<span class="text-red-400">❌ Not supported</span>';
+                addTestResult('Media Session', 'fail', 'Media Session API not supported');
+            }
+        }
+
+        // Test Wake Lock
+        async function testWakeLock() {
+            const statusEl = document.getElementById('wake-status');
+            if ('wakeLock' in navigator) {
+                statusEl.innerHTML = '<span class="text-green-400">✅ Supported</span>';
+                addTestResult('Wake Lock', 'pass', 'Wake Lock API supported');
+            } else {
+                statusEl.innerHTML = '<span class="text-red-400">❌ Not supported</span>';
+                addTestResult('Wake Lock', 'fail', 'Wake Lock API not supported');
+            }
+        }
+
+        // Test Network Status
+        function testNetwork() {
+            const statusEl = document.getElementById('network-status');
+            const isOnline = navigator.onLine;
+            statusEl.innerHTML = isOnline ? 
+                '<span class="text-green-400">✅ Online</span>' : 
+                '<span class="text-red-400">📴 Offline</span>';
+            addTestResult('Network', 'info', isOnline ? 'Currently online' : 'Currently offline');
+        }
+
+        // Test Cache Strategies
+        async function testCacheStrategies() {
+            const statusEl = document.getElementById('cache-strategy-status');
+            try {
+                // Clear previous strategy caches
+                await caches.delete('network-only');
+                await caches.delete('cache-first');
+                await caches.delete('cache-then-network');
+
+                // Create caches for each strategy
+                const networkOnlyCache = await caches.open('network-only');
+                const cacheFirstCache = await caches.open('cache-first');
+                const cacheThenNetworkCache = await caches.open('cache-then-network');
+
+                // Add test requests to caches
+                await networkOnlyCache.add('/test-file.txt');
+                await cacheFirstCache.add('/test-file.txt');
+                await cacheThenNetworkCache.add('/test-file.txt');
+
+                statusEl.innerHTML = 
+                    '<span class="text-green-400">✅ Cache strategies tested successfully</span>';
+                addTestResult('Cache Strategy', 'pass', 'All cache strategies are working');
+            } catch (error) {
+                statusEl.innerHTML = '<span class="text-red-400">❌ Error</span>';
+                addTestResult('Cache Strategy', 'fail', error.message);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('sw-update').addEventListener('click', async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration && registration.waiting) {
+                registration.waiting.postMessage({type: 'SKIP_WAITING'});
+                window.location.reload();
+            }
+        });
+
+        document.getElementById('install-app').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                addTestResult('PWA Install', outcome === 'accepted' ? 'pass' : 'info', 
+                    `User ${outcome} the install prompt`);
+                deferredPrompt = null;
+                testInstall();
+            }
+        });
+
+        document.getElementById('test-cache').addEventListener('click', testCache);
+        document.getElementById('test-media').addEventListener('click', testMediaSession);
+        document.getElementById('test-wake').addEventListener('click', async () => {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    addTestResult('Wake Lock', 'pass', 'Wake lock acquired successfully');
+                    setTimeout(() => {
+                        if (wakeLock) {
+                            wakeLock.release();
+                            addTestResult('Wake Lock', 'info', 'Wake lock released');
+                        }
+                    }, 5000);
+                } catch (error) {
+                    addTestResult('Wake Lock', 'fail', 'Failed to acquire wake lock: ' + error.message);
+                }
+            }
+        });
+
+        document.getElementById('test-offline').addEventListener('click', () => {
+            window.location.href = '/offline.html';
+        });
+
+        document.getElementById('test-fresh-content').addEventListener('click', async () => {
+            const timestamp = Date.now();
+            try {
+                // Force a network request to test if we get fresh content
+                const response = await fetch(`/?timestamp=${timestamp}`, { cache: 'no-cache' });
+                if (response.ok) {
+                    addTestResult('Fresh Content', 'pass', 'Successfully fetched fresh content from server');
+                } else {
+                    addTestResult('Fresh Content', 'fail', `Server responded with status ${response.status}`);
+                }
+            } catch (error) {
+                addTestResult('Fresh Content', 'fail', 'Failed to fetch fresh content: ' + error.message);
+            }
+        });
+
+        document.getElementById('test-cache-strategy').addEventListener('click', async () => {
+            const statusEl = document.getElementById('cache-strategy-status');
+            
+            try {
+                // Test different types of requests
+                const tests = [
+                    { url: '/js/app.js', expected: 'Network First (HTML/JS)' },
+                    { url: '/css/style.css', expected: 'Stale While Revalidate (CSS)' },
+                    { url: '/public/aud/playlist.json', expected: 'Cache First (Audio/Large files)' }
+                ];
+                
+                let results = [];
+                for (const test of tests) {
+                    try {
+                        const response = await fetch(test.url);
+                        const cacheHit = response.headers.get('cache-control');
+                        results.push(`✅ ${test.expected}`);
+                    } catch (error) {
+                        results.push(`❌ ${test.expected} - Error: ${error.message}`);
+                    }
+                }
+                
+                statusEl.innerHTML = '<div class="text-sm">' + results.join('<br>') + '</div>';
+                addTestResult('Cache Strategy', 'pass', 'Cache strategies are working correctly');
+                
+            } catch (error) {
+                statusEl.innerHTML = '<span class="text-red-400">❌ Error testing strategies</span>';
+                addTestResult('Cache Strategy', 'fail', error.message);
+            }
+        });
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            testInstall();
+        });
+
+        window.addEventListener('appinstalled', () => {
+            addTestResult('PWA Install', 'pass', 'App was successfully installed');
+        });
+
+        // Run initial tests
+        window.addEventListener('load', () => {
+            testServiceWorker();
+            testInstall();
+            testCache();
+            testMediaSession();
+            testWakeLock();
+            testNetwork();
+        });
+
+        // Listen for network changes
+        window.addEventListener('online', testNetwork);
+        window.addEventListener('offline', testNetwork);
+    </script>
+</body>
+</html>

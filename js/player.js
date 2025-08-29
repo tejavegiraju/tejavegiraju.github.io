@@ -150,6 +150,36 @@ function updateMediaSession(song) {
     }
 }
 
+// Wake Lock API for preventing device sleep during playback
+let wakeLock = null;
+
+async function requestWakeLock() {
+    if ('wakeLock' in navigator && isPlaying) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Wake lock acquired');
+            
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake lock released');
+            });
+        } catch (err) {
+            console.warn('Wake lock request failed:', err);
+        }
+    }
+}
+
+async function releaseWakeLock() {
+    if (wakeLock) {
+        try {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('Wake lock manually released');
+        } catch (err) {
+            console.warn('Wake lock release failed:', err);
+        }
+    }
+}
+
 // Function to display album art
 function displayAlbumArt(picture) {
     if (picture) {
@@ -422,6 +452,15 @@ function setupAudioEventListeners() {
         const duration = audioPlayer.duration;
         progressBar.max = duration;
         durationTimeDisplay.textContent = formatTime(duration);
+        
+        // Update media session position state
+        if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+            navigator.mediaSession.setPositionState({
+                duration: duration,
+                playbackRate: audioPlayer.playbackRate,
+                position: audioPlayer.currentTime
+            });
+        }
     });
 
     // Event listener to update the progress bar and current time as the song plays
@@ -429,6 +468,15 @@ function setupAudioEventListeners() {
         const currentTime = audioPlayer.currentTime;
         progressBar.value = currentTime;
         currentTimeDisplay.textContent = formatTime(currentTime);
+
+        // Update media session position state
+        if ('mediaSession' in navigator && navigator.mediaSession.setPositionState) {
+            navigator.mediaSession.setPositionState({
+                duration: audioPlayer.duration || 0,
+                playbackRate: audioPlayer.playbackRate || 1,
+                position: currentTime
+            });
+        }
 
         // Update lyrics
         if (parsedLyrics.length > 0) {
@@ -445,6 +493,34 @@ function setupAudioEventListeners() {
                     activeLyric.classList.add('lyric-active');
                     activeLyric.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
+            }
+        }
+    });
+
+    // Handle play events
+    audioPlayer.addEventListener('play', () => {
+        isPlaying = true;
+        updatePlayPauseButton();
+        requestWakeLock(); // Prevent device sleep
+    });
+
+    // Handle pause events
+    audioPlayer.addEventListener('pause', () => {
+        isPlaying = false;
+        updatePlayPauseButton();
+        releaseWakeLock(); // Allow device sleep
+    });
+
+    // Handle visibility change (app goes to background)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // App went to background
+            console.log('App is in background');
+        } else {
+            // App came to foreground
+            console.log('App is in foreground');
+            if (isPlaying && !wakeLock) {
+                requestWakeLock(); // Re-acquire wake lock if needed
             }
         }
     });
@@ -555,9 +631,31 @@ function setupUIEventListeners() {
     miniPrev.addEventListener('click', prevSong);
 }
 
+// Function to update play/pause button state
+function updatePlayPauseButton() {
+    if (isPlaying) {
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+        miniPlayIcon.classList.add('hidden');
+        miniPauseIcon.classList.remove('hidden');
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'playing';
+        }
+    } else {
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+        miniPlayIcon.classList.remove('hidden');
+        miniPauseIcon.classList.add('hidden');
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'paused';
+        }
+    }
+}
+
 // Function to set up the Media Session action handlers once
 function setupMediaSession() {
     if ('mediaSession' in navigator) {
+        // Set up action handlers for media controls
         navigator.mediaSession.setActionHandler('play', () => {
             playPause();
         });
@@ -569,6 +667,53 @@ function setupMediaSession() {
         });
         navigator.mediaSession.setActionHandler('nexttrack', () => {
             nextSong();
+        });
+        navigator.mediaSession.setActionHandler('stop', () => {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            isPlaying = false;
+            updatePlayPauseButton();
+        });
+        
+        // Add seek handlers for scrubbing
+        navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+            const skipTime = details.seekOffset || 10;
+            audioPlayer.currentTime = Math.max(audioPlayer.currentTime - skipTime, 0);
+        });
+        navigator.mediaSession.setActionHandler('seekforward', (details) => {
+            const skipTime = details.seekOffset || 10;
+            audioPlayer.currentTime = Math.min(audioPlayer.currentTime + skipTime, audioPlayer.duration);
+        });
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime) {
+                audioPlayer.currentTime = details.seekTime;
+            }
+        });
+    }
+}
+
+// Update media session metadata when song changes
+function updateMediaSessionMetadata(title, artist, album, artwork) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: title || 'Unknown Track',
+            artist: artist || 'Unknown Artist',
+            album: album || 'Unknown Album',
+            artwork: artwork ? [
+                { src: artwork, sizes: '96x96', type: 'image/png' },
+                { src: artwork, sizes: '128x128', type: 'image/png' },
+                { src: artwork, sizes: '192x192', type: 'image/png' },
+                { src: artwork, sizes: '256x256', type: 'image/png' },
+                { src: artwork, sizes: '384x384', type: 'image/png' },
+                { src: artwork, sizes: '512x512', type: 'image/png' }
+            ] : []
+        });
+        
+        // Update position state for scrubbing
+        navigator.mediaSession.setPositionState({
+            duration: audioPlayer.duration || 0,
+            playbackRate: audioPlayer.playbackRate || 1,
+            position: audioPlayer.currentTime || 0
         });
     }
 }

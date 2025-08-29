@@ -76,7 +76,6 @@ function showContinueGameDialog() {
         // Get saved game data to show player info
         const savedState = loadGameState();
         let playerInfo = '';
-        let gameProgress = '';
         
         if (savedState && savedState.players) {
             const playerNames = savedState.players.map(player => player.name).join(', ');

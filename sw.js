@@ -17,11 +17,11 @@ const urlsToCache = [
   '/js/redirect.js',
   '/manifest.json',
   // Add icon files when they are available
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/public/',
-  '/public/aud',
-'/public/aud/*.mp3'
+  // '/icons/icon-192x192.png',
+  // '/icons/icon-512x512.png',
+  // '/public/',
+  // '/public/aud',
+// '/public/aud/*.mp3'
 ];
 
 // Install event - cache resources

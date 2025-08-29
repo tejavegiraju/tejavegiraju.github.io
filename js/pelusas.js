@@ -84,6 +84,52 @@ function showPrompt(message, defaultValue = '') {
     });
 }
 
+function showConfirm(title, message, confirmText = 'Confirm', cancelText = 'Cancel') {
+    return new Promise((resolve) => {
+        const dialog = createDialog();
+        const content = dialog.querySelector('#dialog-content');
+        const buttons = dialog.querySelector('#dialog-buttons');
+        
+        content.innerHTML = `
+            <h3 class="text-white text-lg font-bold mb-4">${title}</h3>
+            <p class="text-gray-300 mb-4">${message}</p>
+        `;
+        
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = cancelText;
+        cancelButton.className = 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2';
+        cancelButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(false);
+        };
+        
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = confirmText;
+        confirmButton.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-semibold';
+        confirmButton.onclick = () => {
+            document.body.removeChild(dialog);
+            resolve(true);
+        };
+        
+        // Add keyboard support
+        document.addEventListener('keydown', function keyHandler(e) {
+            if (e.key === 'Enter') {
+                confirmButton.click();
+                document.removeEventListener('keydown', keyHandler);
+            } else if (e.key === 'Escape') {
+                cancelButton.click();
+                document.removeEventListener('keydown', keyHandler);
+            }
+        });
+        
+        buttons.appendChild(cancelButton);
+        buttons.appendChild(confirmButton);
+        
+        // Focus on cancel button by default for safety
+        cancelButton.focus();
+    });
+}
+
 function showPlayerPrompt() {
     return new Promise((resolve) => {
         const dialog = createDialog();
@@ -225,7 +271,21 @@ function showPlayerPrompt() {
 export function attachPelusasEvents() {
     document.getElementById('draw-risk').addEventListener('click', drawRisk);
     document.getElementById('skip').addEventListener('click', skipTurn);
-    document.getElementById('reset-pelusas').addEventListener('click', initializePelusas);
+    document.getElementById('reset-pelusas').addEventListener('click', confirmResetPelusas);
+}
+
+// Confirmation dialog for resetting the game
+async function confirmResetPelusas() {
+    const confirmed = await showConfirm(
+        'Reset Game', 
+        'Are you sure you want to reset the game? All current progress will be lost.',
+        'Reset',
+        'Cancel'
+    );
+    
+    if (confirmed) {
+        initializePelusas();
+    }
 }
 
 export function initializePelusas() {

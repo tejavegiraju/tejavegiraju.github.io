@@ -65,27 +65,96 @@ input[type="range"]::-moz-range-thumb {
     right: 1rem;
     opacity: 1;
     transition: all 0.3s ease-in-out;
+    user-select: none;
+    z-index: 40; /* Lower z-index to avoid conflicts */
 }
 
 /* Styles for the minimized state */
 #player-container.minimized {
-    width: 200px; /* Adjust as needed */
-    opacity: 0.5;
+    width: 150px; /* Smaller width */
+    opacity: 0.7;
+    background-color: rgba(75, 82, 92, 0.95); /* Semi-transparent */
+    border-radius: 0.75rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#player-container.minimized:hover {
+    opacity: 1;
+}
+
+/* Dragging state */
+#player-container.dragging {
+    opacity: 0.8;
+    transform: scale(1.05);
+    z-index: 50;
+}
+
+/* Ensure player doesn't interfere with game buttons */
+#player-container.minimized {
+    pointer-events: auto;
+}
+
+#player-container.minimized:not(.dragging) {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Smart positioning to avoid overlap */
+@media (max-width: 768px) {
+    #player-container.minimized {
+        width: 120px;
+        bottom: 5rem; /* Move up on mobile to avoid bottom navigation */
+        right: 0.5rem;
+    }
+    
+    #player-container.minimized #player-header h3 {
+        font-size: 0.625rem;
+    }
+    
+    #player-container.minimized .mini-controls button {
+        width: 20px;
+        height: 20px;
+        font-size: 0.625rem;
+    }
 }
 
 /* Styles for the header when minimized */
 #player-container.minimized #player-header {
-    /* background-color: #3b3b3b; */
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.5rem; /* Smaller padding */
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: none; /* Remove shadow from header */
+    background-color: transparent;
 }
+
 #player-container.minimized #player-header h3 {
-    font-size: 1rem;
+    font-size: 0.75rem; /* Smaller font */
     font-weight: bold;
+    margin: 0;
+    line-height: 1.2;
 }
+
 #player-container.minimized #player-content {
     display: none;
+}
+
+/* Compact mini controls */
+#player-container.minimized .mini-controls {
+    padding: 0.25rem 0.5rem;
+}
+
+#player-container.minimized .mini-controls button {
+    width: 24px; /* Smaller buttons */
+    height: 24px;
+    font-size: 0.75rem;
+}
+
+/* Drag handle styling */
+#player-container.minimized #player-header {
+    cursor: move;
+}
+
+#player-container.minimized #player-header:active {
+    cursor: grabbing;
 }
 
 /* Hide the main controls when minimized */
@@ -115,4 +184,16 @@ input[type="range"]::-moz-range-thumb {
 
 #player-container.minimized #toggle-icon {
     transform: rotate(180deg);
+}
+
+/* Add visual feedback for draggable state */
+#player-container.minimized #player-header::before {
+    content: "⋮⋮";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 0.5;
 }

@@ -1,4 +1,3 @@
-
 // Global variables
 let audioPlayer, playPauseBtn, playIcon, pauseIcon, nextBtn, prevBtn, shuffleBtn, repeatBtn;
 let miniPlayPause, miniNext, miniPrev, miniPlayIcon, miniPauseIcon;
@@ -627,6 +626,7 @@ export function initializePlayer() {
     setupUIEventListeners();
     setupKeyboardShortcuts();
     setupMediaSession();
+    setupDragFunctionality();
 };
 
 function setupKeyboardShortcuts() {
@@ -653,4 +653,119 @@ function setupKeyboardShortcuts() {
 // Function to toggle the minimized/expanded state of the player
 function toggleMiniPlayer() {
     musicPlayerContainer.classList.toggle('minimized');
+}
+
+// Setup drag functionality for the minimized player
+function setupDragFunctionality() {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // Only allow dragging when minimized
+    function canDrag() {
+        return musicPlayerContainer.classList.contains('minimized');
+    }
+
+    // Mouse events
+    playerHeader.addEventListener('mousedown', (e) => {
+        if (!canDrag()) return;
+        
+        isDragging = true;
+        musicPlayerContainer.classList.add('dragging');
+        
+        const rect = musicPlayerContainer.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        
+        // Prevent text selection
+        e.preventDefault();
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !canDrag()) return;
+        
+        // Calculate new position
+        const x = e.clientX - startX;
+        const y = e.clientY - startY;
+        
+        // Keep within viewport bounds
+        const rect = musicPlayerContainer.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+        
+        const clampedX = Math.max(0, Math.min(x, maxX));
+        const clampedY = Math.max(0, Math.min(y, maxY));
+        
+        musicPlayerContainer.style.left = `${clampedX}px`;
+        musicPlayerContainer.style.top = `${clampedY}px`;
+        musicPlayerContainer.style.right = 'auto';
+        musicPlayerContainer.style.bottom = 'auto';
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            musicPlayerContainer.classList.remove('dragging');
+            document.body.style.userSelect = '';
+        }
+    });
+
+    // Touch events for mobile
+    playerHeader.addEventListener('touchstart', (e) => {
+        if (!canDrag()) return;
+        
+        isDragging = true;
+        musicPlayerContainer.classList.add('dragging');
+        
+        const touch = e.touches[0];
+        const rect = musicPlayerContainer.getBoundingClientRect();
+        startX = touch.clientX - rect.left;
+        startY = touch.clientY - rect.top;
+        
+        e.preventDefault();
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging || !canDrag()) return;
+        
+        const touch = e.touches[0];
+        const x = touch.clientX - startX;
+        const y = touch.clientY - startY;
+        
+        // Keep within viewport bounds
+        const rect = musicPlayerContainer.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width;
+        const maxY = window.innerHeight - rect.height;
+        
+        const clampedX = Math.max(0, Math.min(x, maxX));
+        const clampedY = Math.max(0, Math.min(y, maxY));
+        
+        musicPlayerContainer.style.left = `${clampedX}px`;
+        musicPlayerContainer.style.top = `${clampedY}px`;
+        musicPlayerContainer.style.right = 'auto';
+        musicPlayerContainer.style.bottom = 'auto';
+        
+        e.preventDefault();
+    });
+
+    document.addEventListener('touchend', () => {
+        if (isDragging) {
+            isDragging = false;
+            musicPlayerContainer.classList.remove('dragging');
+        }
+    });
+
+    // Reset position when expanded
+    musicPlayerContainer.addEventListener('transitionend', () => {
+        if (!musicPlayerContainer.classList.contains('minimized')) {
+            // Reset to original position when expanded
+            musicPlayerContainer.style.left = '';
+            musicPlayerContainer.style.top = '';
+            musicPlayerContainer.style.right = '1rem';
+            musicPlayerContainer.style.bottom = '1rem';
+        }
+    });
 }

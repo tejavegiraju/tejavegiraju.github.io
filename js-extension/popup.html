@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS Script Runner</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <textarea 
+        id="userInput" 
+        placeholder="Enter input..."
+        rows="3"
+        autofocus
+      ></textarea>
+
+      <div class="button-group">
+        <button id="executeBtn" class="btn-primary">Run</button>
+        <button id="clearBtn" class="btn-secondary">Cancel</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div class="toggle-section">
+        <label>
+          <input type="checkbox" id="showDetailsToggle">
+          Show Details
+        </label>
+      </div>
+
+      <div id="detailsSection" class="details-section" style="display: none;">
+        <div class="info-section">
+          <h3>Current Function:</h3>
+          <pre class="code-block"><code>function abc(arg) {
+  console.log(arg);
+  // Can interact with page elements
+  // Example: document.querySelector('button')?.click();
+}</code></pre>
+        </div>
+
+        <div class="history-section">
+          <h3>Recent Executions:</h3>
+          <div id="history" class="history-list">
+            <div class="history-empty">No executions yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/popup.js"></script>
+</body>
+</html>

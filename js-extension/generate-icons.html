@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icon Generator - JS Script Runner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .instructions {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .canvas-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .icon-set {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    canvas {
+      border: 1px solid #ddd;
+      margin: 10px 0;
+      display: block;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ JS Script Runner - Icon Generator</h1>
+  
+  <div class="instructions">
+    <h2>How to Use:</h2>
+    <ol>
+      <li>Click the "Download" button below each icon</li>
+      <li>Save with exact names: <code>icon16.png</code>, <code>icon48.png</code>, <code>icon128.png</code></li>
+      <li>Place in the <code>js-extension/icons/</code> folder</li>
+      <li>Load the extension in Chrome/Edge</li>
+    </ol>
+  </div>
+
+  <div class="canvas-container">
+    <div class="icon-set">
+      <h3>16x16</h3>
+      <canvas id="icon16" width="16" height="16"></canvas>
+      <button onclick="downloadIcon('icon16', 'icon16.png')">Download</button>
+    </div>
+
+    <div class="icon-set">
+      <h3>48x48</h3>
+      <canvas id="icon48" width="48" height="48"></canvas>
+      <button onclick="downloadIcon('icon48', 'icon48.png')">Download</button>
+    </div>
+
+    <div class="icon-set">
+      <h3>128x128</h3>
+      <canvas id="icon128" width="128" height="128"></canvas>
+      <button onclick="downloadIcon('icon128', 'icon128.png')">Download</button>
+    </div>
+  </div>
+
+  <script>
+    // Draw lightning bolt icon
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const scale = size / 128;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, size, size);
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Draw lightning bolt
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(2 * scale, 1);
+      ctx.lineJoin = 'miter';
+      
+      // Lightning bolt path
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const boltWidth = size * 0.4;
+      const boltHeight = size * 0.6;
+      
+      ctx.beginPath();
+      // Top point
+      ctx.moveTo(centerX, centerY - boltHeight / 2);
+      // Top right
+      ctx.lineTo(centerX - boltWidth * 0.15, centerY - boltHeight * 0.1);
+      // Middle right peak
+      ctx.lineTo(centerX + boltWidth * 0.25, centerY - boltHeight * 0.1);
+      // Bottom left
+      ctx.lineTo(centerX, centerY + boltHeight / 2);
+      // Bottom right
+      ctx.lineTo(centerX + boltWidth * 0.15, centerY + boltHeight * 0.1);
+      // Middle left valley
+      ctx.lineTo(centerX - boltWidth * 0.25, centerY + boltHeight * 0.1);
+      // Close path
+      ctx.closePath();
+      ctx.fill();
+      
+      // Add inner shadow effect for depth
+      if (size >= 48) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - boltHeight / 2);
+        ctx.lineTo(centerX - boltWidth * 0.15, centerY - boltHeight * 0.1);
+        ctx.lineTo(centerX - boltWidth * 0.1, centerY - boltHeight * 0.05);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    
+    // Generate all icons
+    drawIcon(document.getElementById('icon16'), 16);
+    drawIcon(document.getElementById('icon48'), 48);
+    drawIcon(document.getElementById('icon128'), 128);
+    
+    // Download icon
+    function downloadIcon(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>

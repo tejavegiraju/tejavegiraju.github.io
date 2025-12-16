@@ -119,8 +119,11 @@ const funcToExecute = function(userInput) {
     return (async () => {
         for (let i = 0; i < stringList.length; i++) {
             const str = stringList[i];
-            console.log(`\n--- Starting claim ${i + 1}/${stringList.length} ---`);
-            await claim(str, i + 1, stringList.length);
+            const len = str.length;
+            if (len <= 9 && len >= 5) {
+                console.log(`\n--- Starting claim ${i + 1}/${stringList.length} ---`);
+                await claim(str, i + 1, stringList.length);
+            }
             
             // Wait between claims (except after the last one)
             if (i < stringList.length - 1) {
